@@ -1,0 +1,6 @@
+/target
+**/*.rs.bk
+/.idea
+/compile.sh
+/run.sh
+/tictactoe_rust.iml

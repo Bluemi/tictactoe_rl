@@ -1,0 +1,8 @@
+[package]
+name = "tictactoe_rust"
+version = "0.1.0"
+authors = ["Bluemi <bruno.schilling@protonmail.ch>"]
+edition = "2018"
+
+[dependencies]
+rand = "^0.6.5"
