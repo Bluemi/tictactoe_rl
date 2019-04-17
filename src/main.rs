@@ -1,70 +1,65 @@
-mod game;
+mod logic;
 mod random;
 mod winning;
-mod ai;
+mod agent;
+mod game;
 
-use crate::game::{State, EntryKind, StatePosition, is_winning, print_state,
-                  get_interactive_state_position, get_random_state_position, toggle_entry_kind};
-use crate::random::RandomGenerator;
+use crate::agent::random_agent::RandomAgent;
+use crate::agent::interactive_agent::InteractiveAgent;
+use crate::agent::tictactoe_agent::TicTacToeAgent;
+use crate::game::Winner;
 
-
-enum AgentMoveKind {
-	Interactive,
-	Random,
-}
-
-
-struct AgentMove {
-	agent_move_kind: AgentMoveKind,
-	random_generator: RandomGenerator,
-}
-
-
-impl AgentMove {
-	fn new(agent_move_kind: AgentMoveKind) -> AgentMove {
-		AgentMove {
-			agent_move_kind,
-			random_generator: RandomGenerator::new()
-		}
-	}
-
-	fn next_move(&mut self, state: State, entry_kind: EntryKind) -> StatePosition {
-		match self.agent_move_kind {
-			AgentMoveKind::Interactive => get_interactive_state_position(state, entry_kind),
-			AgentMoveKind::Random => get_random_state_position(state,
-															   entry_kind,
-															   &mut self.random_generator),
-		}
-	}
-
-	fn toggle(&mut self) {
-		match self.agent_move_kind {
-			AgentMoveKind::Interactive => self.agent_move_kind = AgentMoveKind::Random,
-			AgentMoveKind::Random => self.agent_move_kind = AgentMoveKind::Interactive,
-		};
-	}
-}
-
+const NUM_TRAIN_GAMES: u32 = 1000 * 1000 * 10;
+const NUM_TEST_GAMES: u32 = 1000;
 
 fn main() {
-	let mut state: State = 0;
-	let mut entry_kind: EntryKind = EntryKind::X;
-	let mut agent_move: AgentMove = AgentMove::new(AgentMoveKind::Interactive);
+	// ----------------- TRAIN -----------------
+	let mut agent_x = TicTacToeAgent::new();
+	let mut agent_o = TicTacToeAgent::new();
+	// agent0.exploit();
+	// agent1.exploit();
 
-	loop {
-		let new_state_position = agent_move.next_move(state, entry_kind);
+	let mut draw_counter = 0;
+	let mut agent_x_counter = 0;
+	let mut agent_o_counter = 0;
 
-		if new_state_position == 0 { break; }
-
-		state |= new_state_position;
-		print_state(state);
-
-		if is_winning(state, entry_kind) {
-			println!("{} has won!", entry_kind.get_text());
-			break;
+	for i in 0..NUM_TRAIN_GAMES {
+		let winner = game::play(&mut agent_x, &mut agent_o, false);
+		match winner {
+			Winner::Draw => draw_counter += 1,
+			Winner::AgentX => agent_x_counter += 1,
+			Winner::AgentO => agent_o_counter += 1,
 		}
-
-		agent_move.toggle();
-		entry_kind = toggle_entry_kind(entry_kind);
+		if i % 100000 == 0 {
+			println!("epoch {}", i);
+		}
 	}
+
+	println!("train agent X : {:4.1}% {:5}", (agent_x_counter as f32 / NUM_TEST_GAMES as f32) * 100.0, agent_x_counter);
+	println!("train agent O : {:4.1}% {:5}", (agent_o_counter as f32 / NUM_TEST_GAMES as f32) * 100.0, agent_o_counter);
+	println!("train draw    : {:4.1}% {:5}", (draw_counter as f32   / NUM_TEST_GAMES as f32) * 100.0, draw_counter);
+
+	// ----------------- TEST -----------------
+	agent_x.exploit();
+	agent_o.exploit();
+
+    let _interactive_agent = InteractiveAgent::new();
+	let _random_agent = RandomAgent::new();
+
+	draw_counter = 0;
+	agent_x_counter = 0;
+	agent_o_counter = 0;
+	for _ in 0..NUM_TEST_GAMES {
+		let winner = game::play(&mut agent_x, &mut agent_o, true);
+        match winner {
+			Winner::Draw => draw_counter += 1,
+			Winner::AgentX => agent_x_counter += 1,
+			Winner::AgentO => agent_o_counter += 1,
+		}
+	}
+
+ 	println!("agent X : {:4.1}% {:5}", (agent_x_counter as f32 / NUM_TEST_GAMES as f32) * 100.0, agent_x_counter);
+	println!("agent O : {:4.1}% {:5}", (agent_o_counter as f32 / NUM_TEST_GAMES as f32) * 100.0, agent_o_counter);
+	println!("draw    : {:4.1}% {:5}", (draw_counter as f32   / NUM_TEST_GAMES as f32) * 100.0, draw_counter);
 }
+
