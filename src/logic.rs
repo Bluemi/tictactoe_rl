@@ -17,7 +17,7 @@ pub enum EntryKind {
 }
 
 impl EntryKind {
-	fn get_shift_size(&self) -> u32 {
+	pub fn get_shift_size(&self) -> u32 {
 		return match self {
 			EntryKind::X => 0,
 			EntryKind::O => 9,

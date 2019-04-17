@@ -1,8 +1,8 @@
 use crate::agent::{Agent, GameMove};
 use crate::logic::{State, StatePosition, print_state, is_winning, EntryKind};
 
-const WIN_REWARD: f64 = 0.0;
-const DRAW_REWARD: f64 = 1.0;
+const WIN_REWARD: f64 = 1.0;
+const DRAW_REWARD: f64 = 0.0;
 const LOSE_REWARD: f64 = -1.0;
 
 #[derive(Clone, Copy)]
@@ -42,7 +42,7 @@ pub fn play<AgentTypeX: Agent,
             break;
         }
 
-        apply_game_move(game_move, entry_kind, &mut state);
+        state = apply_game_move(game_move, entry_kind, state);
 
         if show {
             print_state(state);
@@ -66,12 +66,12 @@ pub fn play<AgentTypeX: Agent,
     return winner;
 }
 
-fn apply_game_move(game_move: GameMove, entry_kind: EntryKind, state: &mut State) {
+fn apply_game_move(game_move: GameMove, entry_kind: EntryKind, state: State) -> State {
     let state_position: StatePosition = match entry_kind {
         EntryKind::X => game_move,
         EntryKind::O => game_move << 9,
     };
-    *state |= state_position;
+    return state | state_position;
 }
 
 fn get_entry_kind(agent_number: u8) -> EntryKind {

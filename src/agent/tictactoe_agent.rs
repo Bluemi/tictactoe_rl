@@ -1,6 +1,7 @@
-use crate::logic::{State, StatePosition, get_random_state_position, get_possible_state_positions};
+use crate::logic::{State, StatePosition, get_random_state_position, get_possible_state_positions, EntryKind};
 use crate::random::RandomGenerator;
 use crate::agent::{Agent, GameMove};
+use crate::logic;
 
 const STEP_SIZE_DECAY: f64 = 0.99999;
 // const STEP_SIZE_DECAY: f64 = 1.0;
@@ -10,27 +11,35 @@ const START_VALUE: f64 = 0.0;
 
 pub struct TicTacToeAgent {
     state_values: Vec<f64>,
-    current_states: [State; 9],
+    current_states: [State; 5],
     num_current_states: usize,
     random_generator: RandomGenerator,
     step_size: f64,
+    entry_kind_shift_width: u32,
     exploit: bool,
+    debug: bool,
 }
 
 impl TicTacToeAgent {
-    pub fn new() -> TicTacToeAgent {
+    pub fn new(entry_kind: EntryKind) -> TicTacToeAgent {
         TicTacToeAgent {
             state_values: vec![START_VALUE; NUM_STATES],
-            current_states: [0; 9],
+            current_states: [0; 5],
             num_current_states: 0,
             random_generator: RandomGenerator::new(),
             step_size: START_STEP_SIZE,
+            entry_kind_shift_width: entry_kind.get_shift_size(),
             exploit: false,
+            debug: false,
         }
     }
 
     pub fn exploit(&mut self) {
         self.exploit = true;
+    }
+
+    pub fn debug(&mut self) {
+        self.debug = true;
     }
 
     fn next_exploit_move(&mut self, state: State) -> GameMove {
@@ -40,11 +49,12 @@ impl TicTacToeAgent {
         if num_possible_moves == 0 { return 0; }
 
         let mut best_move = possible_moves[0];
-        let mut best_value = self.state_values[(state | best_move) as usize];
+        let best_next_state = state | (best_move << self.entry_kind_shift_width);
+        let mut best_value = self.state_values[best_next_state as usize];
 
         for i in 0..num_possible_moves {
             let possible_move = possible_moves[i as usize];
-            let possible_state = possible_move | state;
+            let possible_state = state | (possible_move << self.entry_kind_shift_width);
             let possible_value = self.state_values[possible_state as usize];
             if possible_value > best_value {
                 best_move = possible_move;
@@ -65,8 +75,16 @@ impl TicTacToeAgent {
     }
 
     fn save_state(&mut self, state: State, next_move: StatePosition) {
-        self.current_states[self.num_current_states] = state | next_move;
+        let next_state = state | (next_move << self.entry_kind_shift_width);
+        self.current_states[self.num_current_states] = next_state;
         self.num_current_states += 1;
+
+        if self.debug {
+            println!("added state {} with value {}:",
+                     self.num_current_states,
+                     self.state_values[next_state as usize]);
+            logic::print_state(next_state);
+        }
     }
 }
 
