@@ -50,7 +50,7 @@ fn main() {
 	agent_x_counter = 0;
 	agent_o_counter = 0;
 	for _ in 0..NUM_TEST_GAMES {
-		let winner = game::play(&mut _random_agent, &mut agent_o, true);
+		let winner = game::play(&mut agent_x, &mut _random_agent, true);
         match winner {
 			Winner::Draw => draw_counter += 1,
 			Winner::AgentX => agent_x_counter += 1,
@@ -58,8 +58,8 @@ fn main() {
 		}
 	}
 
+	println!("\n --------------- results ---------------\n");
  	println!("agent X : {:4.1}% {:5}", (agent_x_counter as f32 / NUM_TEST_GAMES as f32) * 100.0, agent_x_counter);
 	println!("agent O : {:4.1}% {:5}", (agent_o_counter as f32 / NUM_TEST_GAMES as f32) * 100.0, agent_o_counter);
 	println!("draw    : {:4.1}% {:5}", (draw_counter as f32   / NUM_TEST_GAMES as f32) * 100.0, draw_counter);
 }
-

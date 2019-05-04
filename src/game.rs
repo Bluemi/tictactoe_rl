@@ -27,6 +27,9 @@ pub fn play<AgentTypeX: Agent,
     agent_o: &mut AgentTypeO,
     show: bool) -> Winner
 {
+    if show {
+        println!(" --------------- new game ---------------\n");
+    }
     let mut state: State = 0;
     let mut agent_number = 0;
 
@@ -37,7 +40,7 @@ pub fn play<AgentTypeX: Agent,
         let game_move: GameMove = get_next_move(agent_x, agent_o, agent_number, state);
         if game_move == 0 {
             if show {
-                println!("draw!");
+                println!("draw!\n");
             }
             break;
         }
@@ -50,7 +53,7 @@ pub fn play<AgentTypeX: Agent,
 
         if is_winning(state, entry_kind) {
             if show {
-                println!("{} has won!", entry_kind.get_text());
+                println!("{} has won!\n", entry_kind.get_text());
             }
             winner = Winner::from_agent_number(agent_number);
             break;
