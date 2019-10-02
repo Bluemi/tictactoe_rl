@@ -3,7 +3,7 @@ use crate::logic::{State, StatePosition, print_state, is_winning, EntryKind};
 
 const WIN_REWARD: f64 = 1.0;
 const DRAW_REWARD: f64 = 0.0;
-const LOSE_REWARD: f64 = -1.0;
+const LOSE_REWARD: f64 = -10.0;
 
 #[derive(Clone, Copy)]
 pub enum Winner {

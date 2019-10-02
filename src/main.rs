@@ -10,8 +10,8 @@ use crate::agent::tictactoe_agent::TicTacToeAgent;
 use crate::game::Winner;
 use crate::logic::EntryKind;
 
-const NUM_TRAIN_GAMES: u32 = 1000 * 1000 * 10;
-const NUM_TEST_GAMES: u32 = 1000;
+const NUM_TRAIN_GAMES: u32 = 500;
+const NUM_TEST_GAMES: u32 = 1000000;
 
 fn main() {
 	// ----------------- TRAIN -----------------
@@ -33,12 +33,15 @@ fn main() {
 		}
 	}
 
+	println!("number of reached states: {}", agent_x.get_number_of_possible_states());
+	println!("number of reached states: {}", agent_o.get_number_of_possible_states());
+
 	println!("train agent X : {:4.1}% {:5}", (agent_x_counter as f32 / NUM_TRAIN_GAMES as f32) * 100.0, agent_x_counter);
 	println!("train agent O : {:4.1}% {:5}", (agent_o_counter as f32 / NUM_TRAIN_GAMES as f32) * 100.0, agent_o_counter);
 	println!("train draw    : {:4.1}% {:5}", (draw_counter as f32   / NUM_TRAIN_GAMES as f32) * 100.0, draw_counter);
 
 	// ----------------- TEST -----------------
-	agent_x.exploit();
+	// agent_x.exploit();
 	agent_o.exploit();
 	// agent_x.debug();
 	// agent_o.debug();
@@ -50,7 +53,7 @@ fn main() {
 	agent_x_counter = 0;
 	agent_o_counter = 0;
 	for _ in 0..NUM_TEST_GAMES {
-		let winner = game::play(&mut agent_x, &mut _random_agent, true);
+		let winner = game::play(&mut agent_x, &mut agent_o, false);
         match winner {
 			Winner::Draw => draw_counter += 1,
 			Winner::AgentX => agent_x_counter += 1,

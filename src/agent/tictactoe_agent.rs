@@ -86,6 +86,10 @@ impl TicTacToeAgent {
             logic::print_state(next_state);
         }
     }
+
+    pub fn get_number_of_possible_states(&self) -> usize {
+        self.state_values.iter().filter(|x| **x != START_VALUE).count()
+    }
 }
 
 impl Agent for TicTacToeAgent {
@@ -102,12 +106,14 @@ impl Agent for TicTacToeAgent {
     }
 
     fn apply_reward(&mut self, reward: f64) {
-        for i in 0..self.num_current_states {
-            let state = self.current_states[i] as usize;
-            let a = self.state_values[state];
-            self.state_values[state] = a + self.step_size * (reward - a);
+        if !self.exploit {
+            for i in 0..self.num_current_states {
+                let state = self.current_states[i] as usize;
+                let a = self.state_values[state];
+                self.state_values[state] = a + self.step_size * (reward - a);
+            }
+            self.step_size *= STEP_SIZE_DECAY;
         }
-        self.step_size *= STEP_SIZE_DECAY;
         self.num_current_states = 0;
     }
 
